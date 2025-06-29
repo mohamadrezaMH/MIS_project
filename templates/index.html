@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>سیستم احراز هویت دو مرحله‌ای</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet" />
+    <link rel="stylesheet" href="../static/css/style.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  </head>
+  <body>
+    <div class="auth-container" id="login-container">
+      <div class="auth-header">
+        <h2>ورود به سیستم</h2>
+        <p>لطفا اطلاعات حساب خود را وارد کنید</p>
+      </div>
+
+      <div class="auth-body">
+        <div class="step-indicator">
+          <div class="step active">
+            <div class="step-icon">1</div>
+            <div class="step-text">ورود</div>
+          </div>
+          <div class="step">
+            <div class="step-icon">2</div>
+            <div class="step-text">احراز هویت</div>
+          </div>
+          <div class="step">
+            <div class="step-icon">3</div>
+            <div class="step-text">تکمیل</div>
+          </div>
+        </div>
+
+        <form id="login-form">
+          <div class="form-group">
+            <label for="username" class="form-label">نام کاربری</label>
+            <div class="input-group">
+              <input
+                type="text"
+                class="form-control"
+                id="username"
+                placeholder="نام کاربری خود را وارد کنید"
+                required />
+              <span
+                class="input-group-text bg-transparent border-0 position-absolute start-0 top-50 translate-middle-y">
+                <i class="fas fa-user"></i>
+              </span>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="password" class="form-label">رمز عبور</label>
+            <div class="input-group">
+  <input
+    type="password"
+    class="form-control"
+    id="password"
+    placeholder="رمز عبور خود را وارد کنید"
+    required
+  />
+  <span class="lock-icon">
+    <i class="fas fa-lock"></i>
+  </span>
+  <span class="password-toggle" id="password-toggle" style="display:none">
+    <i class="fas fa-eye"></i>
+  </span>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <button type="submit" class="btn btn-primary" id="login-btn">
+              ورود به سیستم
+              <i class="fas fa-arrow-left ms-2"></i>
+            </button>
+          </div>
+        </form>
+
+        <div class="auth-footer">
+          سیستم احراز هویت دو مرحله‌ای | طراحی شده توسط Alireza & Mohamadreza
+        </div>
+      </div>
+    </div>
+
+    <div class="auth-container d-none" id="verify-container">
+      <div class="auth-header">
+        <h2>تأیید دو مرحله‌ای</h2>
+        <p>کد تأیید به پیام‌رسان بله شما ارسال شد</p>
+      </div>
+
+      <div class="auth-body">
+        <div class="step-indicator">
+          <div class="step">
+            <div class="step-icon">1</div>
+            <div class="step-text">ورود</div>
+          </div>
+          <div class="step active">
+            <div class="step-icon">2</div>
+            <div class="step-text">احراز هویت</div>
+          </div>
+          <div class="step">
+            <div class="step-icon">3</div>
+            <div class="step-text">تکمیل</div>
+          </div>
+        </div>
+
+        <div class="alert alert-info">
+          <i class="fas fa-info-circle me-2"></i>
+          کد تأیید ۶ رقمی به پیام‌رسان بله شما ارسال شده است. لطفاً آن را در
+          کادر زیر وارد کنید.
+        </div>
+
+        <div class="timer" id="timer">02:00</div>
+
+        <form id="verify-form">
+          <div class="form-group">
+            <label for="verification-code" class="form-label">کد تأیید</label>
+            <div class="input-group">
+              <input
+                type="text"
+                class="form-control text-center"
+                id="verification-code"
+                placeholder="ـــ ـــ ـــ"
+                maxlength="6"
+                required />
+              <span
+                class="input-group-text bg-transparent border-0 position-absolute start-0 top-50 translate-middle-y">
+                <i class="fas fa-shield-alt"></i>
+              </span>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <button type="submit" class="btn btn-primary" id="verify-btn">
+              تأیید کد
+              <i class="fas fa-check ms-2"></i>
+            </button>
+          </div>
+        </form>
+
+        <div class="resend-link">
+          کد را دریافت نکرده‌اید؟
+          <a id="resend-code">ارسال مجدد کد</a>
+        </div>
+
+        <div class="auth-footer">کد ارسال شده به مدت ۲ دقیقه معتبر است</div>
+      </div>
+    </div>
+
+    <div class="auth-container d-none" id="success-container">
+      <div class="success-container">
+        <div class="success-icon">
+          <i class="fas fa-check"></i>
+        </div>
+        <h3 class="mb-3">ورود موفقیت‌آمیز!</h3>
+        <p class="mb-4">شما با موفقیت به حساب کاربری خود دسترسی پیدا کردید.</p>
+        <button class="btn btn-primary" id="back-to-login">
+          بازگشت به صفحه ورود
+        </button>
+      </div>
+    </div>
+
+    <div class="auth-container d-none" id="failure-container">
+      <div class="success-container">
+        <div class="success-icon failure-icon">
+          <i class="fas fa-times"></i>
+        </div>
+        <h3 class="mb-3">ورود ناموفق!</h3>
+        <p class="mb-4" id="failure-reason">
+          کد تأیید وارد شده معتبر نیست یا منقضی شده است.
+        </p>
+        <button class="btn btn-primary" id="try-again">تلاش مجدد</button>
+      </div>
+    </div>
+
+    <!-- <script src="../static/js/sweetAlert2.js"></script> -->
+     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="../static/js/script.js"></script>
+  </body>
+</html>
