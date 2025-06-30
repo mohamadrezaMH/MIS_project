@@ -232,30 +232,25 @@ body {
 
 
 
-
-
-
-
-
-
-
-.position-relative {
-  position: relative;
-}
-
-.lock-icon,
-.password-toggle {
+/*////////////////////*/
+.lock-icon, .password-toggle {
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
   cursor: pointer;
-  transition: opacity 0.3s;
+  z-index: 10; 
 }
 
 .lock-icon {
   left: 15px;
+  pointer-events: none;
 }
 
 .password-toggle {
-  left : 15px;
+  left: 15px;
+}
+
+.form-control {
+  padding-left: 40px;
+
 }

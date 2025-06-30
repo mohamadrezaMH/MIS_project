@@ -2,52 +2,46 @@ const passwordInput = document.getElementById('password');
 const lockIcon = document.querySelector('.lock-icon');
 const eyeIcon = document.getElementById('password-toggle');
 
-// مدیریت نمایش آیکون‌ها بر اساس فوکوس و محتوا
-passwordInput.addEventListener('focus', () => {
-  lockIcon.style.display = 'none';
-  if (passwordInput.value.length > 0) {
-    eyeIcon.style.display = 'block';
-  }
-});
+// Function to update icon visibility states
+function updateIcons() {
+  const hasValue = passwordInput.value.length > 0;
+  const isFocused = document.activeElement === passwordInput;
 
-passwordInput.addEventListener('blur', () => {
-  if (passwordInput.value.length === 0) {
-    lockIcon.style.display = 'block';
-  }
-  eyeIcon.style.display = 'none';
-});
+  // Lock icon: show only when input is empty AND not focused
+  lockIcon.style.display = (isFocused) ? 'none' : 'block';
+  
+  // Eye icon: show only when input is focused AND contains text
+  eyeIcon.style.display = (isFocused && hasValue) ? 'block' : 'none';
+}
 
-passwordInput.addEventListener('input', () => {
-  if (passwordInput.value.length > 0) {
-    lockIcon.style.display = 'none';
-    if (document.activeElement === passwordInput) {
-      eyeIcon.style.display = 'block';
-    }
-  } else {
-    lockIcon.style.display = 'block';
-    eyeIcon.style.display = 'none';
-  }
-});
+// Event listeners for input interactions
+passwordInput.addEventListener('focus', updateIcons);  // Update on focus
+passwordInput.addEventListener('blur', updateIcons);   // Update on blur
+passwordInput.addEventListener('input', updateIcons);  // Update on typing
 
-// مدیریت نمایش/مخفی کردن رمز
-eyeIcon.addEventListener('click', function() {
+// Handle eye icon click to toggle password visibility
+eyeIcon.addEventListener('mousedown', function(e) {
+  e.preventDefault();  // Prevent input blur when clicking icon
+  
   const icon = this.querySelector('i');
   
+  // Toggle password visibility
   if (passwordInput.type === 'password') {
     passwordInput.type = 'text';
-    icon.classList.replace('fa-eye', 'fa-eye-slash');
+    icon.classList.replace('fa-eye', 'fa-eye-slash');  // Show closed eye
   } else {
     passwordInput.type = 'password';
-    icon.classList.replace('fa-eye-slash', 'fa-eye');
+    icon.classList.replace('fa-eye-slash', 'fa-eye');  // Show open eye
   }
+  
+  // Maintain input focus after toggle
+  passwordInput.focus();
 });
 
-// مقداردهی اولیه
-lockIcon.style.display = 'block';
-document.getElementById('password').addEventListener('blur', () => {
-  icon.classList.remove('fa-eye');
-  icon.classList.remove('fa-eye-slash');
-});
+// Initialize icon states on page load
+updateIcons();
+
+
 
 // Timer variables
 let timerInterval;
