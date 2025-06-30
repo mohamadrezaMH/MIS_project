@@ -8,12 +8,18 @@ import os
 from werkzeug.security import generate_password_hash, check_password_hash
 from config import BALE_BOT_TOKEN
 
+from sqlalchemy import text  # این خط را در بالای فایل اضافه کنید
+
+
 app = Flask(__name__)
 app.secret_key = os.environ.get('SECRET_KEY') or secrets.token_hex(32)
 
 # تنظیمات دیتابیس
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{os.path.join(app.instance_path, "database.db")}'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['SQLALCHEMY_ECHO'] = True
+if not os.path.exists(app.instance_path):
+    os.makedirs(app.instance_path)
 db = SQLAlchemy(app)
 
 class User(db.Model):
@@ -22,14 +28,39 @@ class User(db.Model):
     password = db.Column(db.String(200), nullable=False)
     bale_chat_id = db.Column(db.String(120))
 
+
 def initialize_database():
     with app.app_context():
+        # فقط جدول User را ایجاد می‌کند
         db.create_all()
-        print("database created")
+        print("جدول User ایجاد شد")
 
 initialize_database()
 
+# در app.py
+print(f"استفاده از دیتابیس: {app.config['SQLALCHEMY_DATABASE_URI']}")
+
 # ---------- API Endpoints ----------
+
+# حذف @app.before_first_request و جایگزینی با این کد
+# with app.app_context():
+    # # ایجاد جدول کاربران اگر وجود ندارد
+    # if not db.engine.has_table('user'):
+    #     db.create_all()
+    #     print("جدول User ایجاد شد")
+    # else:
+    #     print("جدول User از قبل وجود دارد")
+    
+    # # بررسی وجود جدول hospitals
+    # if db.engine.has_table('hospitals'):
+    #     result = db.session.execute(text("SELECT COUNT(*) FROM hospitals"))
+    #     count = result.scalar()
+    #     print(f"تعداد رکوردها در hospitals: {count}")
+    # else:
+    #     print("جدول hospitals یافت نشد")
+        
+        
+        
 
 @app.route('/')
 def index():
@@ -81,7 +112,7 @@ def api_verify():
     if user_code == session.get('verification_code'):
         return jsonify({
             'success': True,
-            'message': 'ورود موفقیت‌آمیز بود'
+            'redirect': '/dashboard'
         })
     else:
         return jsonify({
@@ -117,6 +148,48 @@ def api_resend():
         'success': True,
         'message': 'کد جدید ارسال شد'
     })
+    
+    
+@app.route('/dashboard')
+def dashboard():
+    
+    try:
+        from sqlalchemy import text
+        query = text("SELECT * FROM hospitals")
+        result = db.session.execute(query)
+        
+        # حل مشکل تبدیل به دیکشنری
+        hospitals = []
+        columns = result.keys()  # دریافت نام ستون‌ها
+        
+        for row in result:
+            # ایجاد دیکشنری با زوج‌های (ستون: مقدار)
+            hospital_dict = {column: value for column, value in zip(columns, row)}
+            hospitals.append(hospital_dict)
+        
+        print(f"تعداد بیمارستان‌ها: {len(hospitals)}")
+        
+        # برای دیباگ: نمایش اولین رکورد
+        if hospitals:
+            print("نمونه رکورد:")
+            print(hospitals[0])
+        
+        return render_template('dashboard.html', hospitals=hospitals)
+    except Exception as e:
+        import traceback
+        print(f"خطا در لود داشبورد: {str(e)}")
+        traceback.print_exc()
+        return f"خطا در لود داشبورد: {str(e)}", 500
+
+
+import json
+
+@app.template_filter('tojson')
+def tojson_filter(obj):
+    return json.dumps(obj, ensure_ascii=False, indent=2)
+    
+
+
 
 def send_bale_message(user_id, message, bot_token):
     """ارسال پیام به کاربر از طریق ربات بله"""

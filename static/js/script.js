@@ -101,10 +101,18 @@ function showVerification() {
 
 // Function to show final success
 function showFinalSuccess() {
-    document.getElementById('verify-container').classList.add('d-none');
-    document.getElementById('success-container').classList.remove('d-none');
-    clearInterval(timerInterval);
+    Swal.fire({
+        icon: 'success',
+        title: 'ورود موفقیت‌آمیز!',
+        text: 'در حال انتقال به صفحه داشبورد...',
+        timer: 2000,
+        timerProgressBar: true,
+        showConfirmButton: false
+    }).then(() => {
+        window.location.href = '/dashboard';
+    });
 }
+
 
 // Function to show failure
 function showFailure(message) {

@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>داشبورد بیمارستان‌ها</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="../static/css/dashboard.css">
+
+</head>
+<body>
+    <div class="dashboard-container">
+        <button class="btn btn-light logout-btn" onclick="window.location.href='/'">
+            <i class="fas fa-sign-out-alt"></i> خروج از سیستم
+        </button>
+        
+        <div class="dashboard-header">
+            <div class="text-center">
+                <h1><i class="fas fa-hospital me-3"></i>سیستم رتبه‌بندی بیمارستان‌ها</h1>
+                <p class="mb-0">بررسی جامع عملکرد و کیفیت خدمات بیمارستان‌ها</p>
+            </div>
+        </div>
+
+        <div class="row stats-container">
+            <div class="col-lg-3 col-md-6 mb-4">
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-hospital-alt"></i>
+                    </div>
+                    <div class="stat-value">{{ hospitals|length }}</div>
+                    <div class="stat-label">تعداد بیمارستان‌ها</div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6 mb-4">
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-star"></i>
+                    </div>
+                    <div class="stat-value">4.2</div>
+                    <div class="stat-label">میانگین امتیاز کلی</div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6 mb-4">
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-heartbeat"></i>
+                    </div>
+                    <div class="stat-value">92%</div>
+                    <div class="stat-label">رضایت بیماران</div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6 mb-4">
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-procedures"></i>
+                    </div>
+                    <div class="stat-value">18</div>
+                    <div class="stat-label">ایالت‌های تحت پوشش</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="data-card">
+            <div class="card-header">
+                <i class="fas fa-list me-2"></i>لیست بیمارستان‌ها و امتیازات
+            </div>
+            
+            <div class="search-container">
+                <div class="search-box">
+                    <div class="input-group">
+                        <input type="text" class="form-control" placeholder="جستجوی نام بیمارستان..." id="searchInput">
+                        <button class="btn btn-primary" type="button">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="table-container">
+                <table class="hospital-table">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>نام بیمارستان</th>
+                            <th>موقعیت</th>
+                            <th>نوع</th>
+                            <th>امتیاز کلی</th>
+                            <th>مرگ‌ومیر</th>
+                            <th>ایمنی</th>
+                            <th>بازگشت بیمار</th>
+                            <th>عملیات</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+    {% for hospital in hospitals %}
+    <tr>
+        <td>{{ loop.index }}</td>
+        <td>
+            <div class="hospital-name">{{ hospital['Facility_Name'] }}</div>
+            <div class="hospital-city">
+                <i class="fas fa-map-marker-alt"></i>
+                {{ hospital['Facility_City'] }}, {{ hospital['Facility_State'] }}
+            </div>
+        </td>
+        <td>
+            <span class="hospital-type">{{ hospital['Facility_Type'] }}</span>
+        </td>
+        <td>
+            <div class="rating-cell">
+                <span class="rating-badge rating-{% if hospital['Rating_Overall']|float >= 4 %}excellent{% elif hospital['Rating_Overall']|float >= 3 %}good{% elif hospital['Rating_Overall']|float >= 2 %}average{% else %}poor{% endif %}">
+                    {{ hospital['Rating_Overall'] }}
+                </span>
+                <i class="fas fa-star text-warning"></i>
+            </div>
+        </td>
+        <td>
+            <div class="rating-cell">
+                <span class="rating-badge rating-{% if hospital['Rating_Mortality']|float >= 4 %}excellent{% elif hospital['Rating_Mortality']|float >= 3 %}good{% elif hospital['Rating_Mortality']|float >= 2 %}average{% else %}poor{% endif %}">
+                    {{ hospital['Rating_Mortality'] }}
+                </span>
+            </div>
+        </td>
+        <td>
+            <div class="rating-cell">
+                <span class="rating-badge rating-{% if hospital['Rating_Safety']|float >= 4 %}excellent{% elif hospital['Rating_Safety']|float >= 3 %}good{% elif hospital['Rating_Safety']|float >= 2 %}average{% else %}poor{% endif %}">
+                    {{ hospital['Rating_Safety'] }}
+                </span>
+            </div>
+        </td>
+        <td>
+            <div class="rating-cell">
+                <span class="rating-badge rating-{% if hospital['Rating_Readmission']|float >= 4 %}excellent{% elif hospital['Rating_Readmission']|float >= 3 %}good{% elif hospital['Rating_Readmission']|float >= 2 %}average{% else %}poor{% endif %}">
+                    {{ hospital['Rating_Readmission'] }}
+                </span>
+            </div>
+        </td>
+        <td>
+            <button class="btn btn-outline-primary action-btn">
+                <i class="fas fa-chart-bar me-1"></i>جزئیات
+            </button>
+            <button class="btn btn-outline-success action-btn">
+                <i class="fas fa-file-medical me-1"></i>گزارش
+            </button>
+        </td>
+    </tr>
+    {% else %}
+    <tr>
+        <td colspan="9" class="text-center py-4">
+            <i class="fas fa-database fa-2x mb-3"></i>
+            <h4>هیچ داده‌ای یافت نشد</h4>
+            <p class="text-muted">لطفاً مطمئن شوید دیتابیس حاوی اطلاعات است</p>
+        </td>
+    </tr>
+    {% endfor %}
+</tbody>
+                </table>
+            </div>
+            
+            <div class="pagination-container">
+                <nav>
+                    <ul class="pagination">
+                        <li class="page-item disabled"><a class="page-link" href="#">قبلی</a></li>
+                        <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                        <li class="page-item"><a class="page-link" href="#">2</a></li>
+                        <li class="page-item"><a class="page-link" href="#">3</a></li>
+                        <li class="page-item"><a class="page-link" href="#">بعدی</a></li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="../static/js/dashboard.js"></script>
+</body>
+</html>
