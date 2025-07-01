@@ -210,7 +210,67 @@ import json
 @app.template_filter('tojson')
 def tojson_filter(obj):
     return json.dumps(obj, ensure_ascii=False, indent=2)
-    
+   
+   
+# این endpoint جدید را به app.py اضافه کنید
+@app.route('/api/search')
+def api_search():
+    try:
+        from sqlalchemy import text
+        search_term = request.args.get('q', '').strip()
+        page = request.args.get('page', 1, type=int)
+        per_page = 50
+        
+        # اگر عبارت جستجو خالی است، تمام رکوردها را برگردان
+        if not search_term:
+            query = text("SELECT * FROM hospitals")
+            count_query = text("SELECT COUNT(*) FROM hospitals")
+        else:
+            query = text("SELECT * FROM hospitals WHERE Facility_Name LIKE :search")
+            count_query = text("SELECT COUNT(*) FROM hospitals WHERE Facility_Name LIKE :search")
+        
+        # محاسبه offset
+        offset = (page - 1) * per_page
+        
+        # اجرای کوئری تعداد کل
+        if search_term:
+            total_count = db.session.scalar(count_query, {'search': f'%{search_term}%'})
+        else:
+            total_count = db.session.scalar(count_query)
+        
+        # اجرای کوئری داده‌ها با pagination
+        query_str = str(query) + f" LIMIT {per_page} OFFSET {offset}"
+        if search_term:
+            result = db.session.execute(text(query_str), {'search': f'%{search_term}%'})
+        else:
+            result = db.session.execute(text(query_str))
+        
+        # تبدیل نتایج به دیکشنری
+        hospitals = []
+        columns = result.keys()
+        
+        global_index_start = offset + 1
+        for i, row in enumerate(result):
+            hospital_dict = {column: value for column, value in zip(columns, row)}
+            hospital_dict['global_index'] = global_index_start + i
+            hospitals.append(hospital_dict)
+        
+        # محاسبه تعداد صفحات
+        total_pages = (total_count + per_page - 1) // per_page
+        
+        return jsonify({
+            'success': True,
+            'hospitals': hospitals,
+            'total_count': total_count,
+            'total_pages': total_pages,
+            'current_page': page
+        })
+    except Exception as e:
+        print(f"خطا در جستجو: {str(e)}")
+        return jsonify({
+            'success': False,
+            'message': 'خطا در انجام جستجو'
+        }), 500 
 
 
 

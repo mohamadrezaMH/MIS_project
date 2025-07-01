@@ -227,7 +227,8 @@
         
         .search-box {
             max-width: 400px;
-            margin-left: auto;
+            /* margin-left: 10px; */
+            direction: rtl;
         }
         
         .pagination-container {
@@ -309,4 +310,19 @@
 .page-link:hover:not(.active) {
     background-color: #e9ecef;
     border-color: #dee2e6;
+}
+
+
+
+/* اضافه کردن این استایل‌ها */
+.spinner-border {
+    width: 3rem;
+    height: 3rem;
+}
+
+.alert-danger {
+    background-color: #f8d7da;
+    border-color: #f5c6cb;
+    color: #721c24;
+    border-radius: 10px;
 }
