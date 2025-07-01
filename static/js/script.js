@@ -1,53 +1,53 @@
+// Password field elements
 const passwordInput = document.getElementById('password');
 const lockIcon = document.querySelector('.lock-icon');
 const eyeIcon = document.getElementById('password-toggle');
 
-// Function to update icon visibility states
+/**
+ * Update visibility of password field icons
+ */
 function updateIcons() {
-  const hasValue = passwordInput.value.length > 0;
-  const isFocused = document.activeElement === passwordInput;
-
-  // Lock icon: show only when input is empty AND not focused
-  lockIcon.style.display = (isFocused) ? 'none' : 'block';
-  
-  // Eye icon: show only when input is focused AND contains text
-  eyeIcon.style.display = (isFocused && hasValue) ? 'block' : 'none';
+    const hasValue = passwordInput.value.length > 0;
+    const isFocused = document.activeElement === passwordInput;
+    
+    // Show lock icon only when input is empty and not focused
+    lockIcon.style.display = isFocused ? 'none' : 'block';
+    
+    // Show eye icon only when input is focused and has value
+    eyeIcon.style.display = (isFocused && hasValue) ? 'block' : 'none';
 }
 
-// Event listeners for input interactions
-passwordInput.addEventListener('focus', updateIcons);  // Update on focus
-passwordInput.addEventListener('blur', updateIcons);   // Update on blur
-passwordInput.addEventListener('input', updateIcons);  // Update on typing
-
-// Handle eye icon click to toggle password visibility
-eyeIcon.addEventListener('mousedown', function(e) {
-  e.preventDefault();  // Prevent input blur when clicking icon
-  
-  const icon = this.querySelector('i');
-  
-  // Toggle password visibility
-  if (passwordInput.type === 'password') {
-    passwordInput.type = 'text';
-    icon.classList.replace('fa-eye', 'fa-eye-slash');  // Show closed eye
-  } else {
-    passwordInput.type = 'password';
-    icon.classList.replace('fa-eye-slash', 'fa-eye');  // Show open eye
-  }
-  
-  // Maintain input focus after toggle
-  passwordInput.focus();
-});
-
-// Initialize icon states on page load
+// Initialize icon states
 updateIcons();
 
+// Add event listeners for password field interactions
+passwordInput.addEventListener('focus', updateIcons);
+passwordInput.addEventListener('blur', updateIcons);
+passwordInput.addEventListener('input', updateIcons);
 
+// Toggle password visibility
+eyeIcon.addEventListener('mousedown', function(e) {
+    e.preventDefault();
+    const icon = this.querySelector('i');
+    
+    if (passwordInput.type === 'password') {
+        passwordInput.type = 'text';
+        icon.classList.replace('fa-eye', 'fa-eye-slash');
+    } else {
+        passwordInput.type = 'password';
+        icon.classList.replace('fa-eye-slash', 'fa-eye');
+    }
+    
+    passwordInput.focus();
+});
 
 // Timer variables
 let timerInterval;
 let timeLeft = 120; // 2 minutes
 
-// Function to start timer
+/**
+ * Start countdown timer
+ */
 function startTimer() {
     clearInterval(timerInterval);
     timeLeft = 120;
@@ -64,7 +64,9 @@ function startTimer() {
     }, 1000);
 }
 
-// Function to update timer display
+/**
+ * Update timer display
+ */
 function updateTimerDisplay() {
     const minutes = Math.floor(timeLeft / 60);
     const seconds = timeLeft % 60;
@@ -72,7 +74,10 @@ function updateTimerDisplay() {
         `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
 }
 
-// Success message display function
+/**
+ * Show success message
+ * @param {string} message - Message to display
+ */
 function showSuccess(message) {
     Swal.fire({
         icon: 'success',
@@ -82,7 +87,10 @@ function showSuccess(message) {
     });
 }
 
-// Error message display function
+/**
+ * Show error message
+ * @param {string} message - Error message
+ */
 function showError(message) {
     Swal.fire({
         icon: 'error',
@@ -92,14 +100,18 @@ function showError(message) {
     });
 }
 
-// Function to show verification step
+/**
+ * Show verification step UI
+ */
 function showVerification() {
     document.getElementById('login-container').classList.add('d-none');
     document.getElementById('verify-container').classList.remove('d-none');
     startTimer();
 }
 
-// Function to show final success
+/**
+ * Handle successful login
+ */
 function showFinalSuccess() {
     Swal.fire({
         icon: 'success',
@@ -113,8 +125,10 @@ function showFinalSuccess() {
     });
 }
 
-
-// Function to show failure
+/**
+ * Show failure message
+ * @param {string} message - Failure reason
+ */
 function showFailure(message) {
     document.getElementById('failure-reason').textContent = message;
     document.getElementById('verify-container').classList.add('d-none');
@@ -122,52 +136,50 @@ function showFailure(message) {
     clearInterval(timerInterval);
 }
 
-// تغییر در تابع resetForms برای پاک کردن session
+/**
+ * Reset forms and clear session
+ */
 async function resetForms() {
+    // Clear input fields
     document.getElementById('username').value = '';
     document.getElementById('password').value = '';
     document.getElementById('verification-code').value = '';
-    clearInterval(timerInterval);
     
-    // Reset password icon
+    // Reset password field
     const passwordInput = document.getElementById('password');
     const icon = document.querySelector('#password-toggle i');
     passwordInput.type = 'password';
-    icon.classList.remove('fa-eye-slash');
-    icon.classList.add('fa-eye');
+    icon.classList.replace('fa-eye-slash', 'fa-eye');
     
-    // Return to login page
-    document.getElementById('success-container').classList.add('d-none');
+    // Reset UI states
     document.getElementById('failure-container').classList.add('d-none');
     document.getElementById('login-container').classList.remove('d-none');
+    clearInterval(timerInterval);
     
-    // پاک کردن session از طریق API
+    // Clear server session
     try {
         await fetch('/logout', { method: 'POST' });
     } catch (error) {
-        console.error('Logout error in resetForms:', error);
+        console.error('Logout error:', error);
     }
 }
 
-
-// در انتهای فایل، قبل از event listenerها
-
-// تابع برای خروج از سیستم
+/**
+ * Logout user
+ */
 async function logout() {
     try {
-        await fetch('/logout', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        });
+        await fetch('/logout', { method: 'POST' });
         resetForms();
         window.location.href = '/';
     } catch (error) {
-        console.error('Logout error:', error);
         showError('خطا در خروج از سیستم');
     }
 }
+
+// ----------------------------
+// Event Listeners
+// ----------------------------
 
 // Login form submission
 document.getElementById('login-form').addEventListener('submit', async function(e) {
@@ -179,22 +191,14 @@ document.getElementById('login-form').addEventListener('submit', async function(
     try {
         const response = await fetch('/api/login', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
+            headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({ username, password })
         });
         
         const data = await response.json();
-        
-        if (data.success) {
-            showVerification();
-        } else {
-            showError(data.message);
-        }
+        data.success ? showVerification() : showError(data.message);
     } catch (error) {
         showError('خطا در ارتباط با سرور');
-        console.error('Login error:', error);
     }
 });
 
@@ -207,33 +211,23 @@ document.getElementById('verify-form').addEventListener('submit', async function
     try {
         const response = await fetch('/api/verify', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
+            headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({ code })
         });
         
         const data = await response.json();
-        
-        if (data.success) {
-            showFinalSuccess();
-        } else {
-            showError(data.message);
-        }
+        data.success ? showFinalSuccess() : showError(data.message);
     } catch (error) {
         showError('خطا در ارتباط با سرور');
-        console.error('Verification error:', error);
     }
 });
 
-// Resend code
+// Resend verification code
 document.getElementById('resend-code').addEventListener('click', async function() {
     try {
         const response = await fetch('/api/resend', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            }
+            headers: {'Content-Type': 'application/json'}
         });
         
         const data = await response.json();
@@ -251,6 +245,9 @@ document.getElementById('resend-code').addEventListener('click', async function(
         }
     } catch (error) {
         showError('خطا در ارتباط با سرور');
-        console.error('Resend error:', error);
     }
 });
+
+// Back to login buttons
+// document.getElementById('back-to-login')?.addEventListener('click', resetForms);
+// document.getElementById('try-again')?.addEventListener('click', resetForms);

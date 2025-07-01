@@ -1,24 +1,19 @@
 import csv
 import sqlite3
-from flask import Flask
 import os
 
 def import_hospitals(csv_file):
-    # ایجاد یک برنامه Flask موقت برای دسترسی به instance_path
-    app = Flask(__name__)
-    app.instance_path = os.path.join(os.getcwd(), 'instance')  # تنظیم مسیر instance
+    """Import hospital data from CSV to SQLite database"""
+    # Configure database path
+    instance_path = os.path.join(os.getcwd(), 'instance')
+    db_file = os.path.join(instance_path, 'database.db')
     
-    # مسیر دیتابیس
-    db_file = os.path.join(app.instance_path, 'database.db')
-    print(f"استفاده از دیتابیس: {db_file}")
-    
+    # Create database connection
     conn = sqlite3.connect(db_file)
     cursor = conn.cursor()
     
-    # 1. حذف جدول قدیمی اگر وجود دارد
+    # Recreate hospitals table
     cursor.execute("DROP TABLE IF EXISTS hospitals")
-    
-    # 2. ایجاد جدول جدید با ساختار صحیح (بدون فیلد id)
     cursor.execute("""
     CREATE TABLE hospitals (
         Facility_Name TEXT,
@@ -48,27 +43,27 @@ def import_hospitals(csv_file):
     );
     """)
     
+    # Import CSV data
     row_count = 0
-    
     with open(csv_file, 'r', encoding='utf-8') as file:
         reader = csv.reader(file)
-        next(reader)  # رد کردن هدر
+        next(reader)  # Skip header
         
         for row in reader:
             if len(row) == 24:
-                cursor.execute("""
-                INSERT INTO hospitals VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 
-                                             ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
-                                             ?, ?, ?, ?)
-                """, row)
+                cursor.execute("INSERT INTO hospitals VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", row)
                 row_count += 1
-                # نمایش هر 100 رکورد
+                
+                # Print progress
                 if row_count % 100 == 0:
-                    print(f"{row_count} رکورد وارد شد...")
+                    print(f"Imported {row_count} records...")
     
+    # Commit changes and close connection
     conn.commit()
-    print(f"جمعاً {row_count} رکورد وارد شد")
     conn.close()
+    print(f"Successfully imported {row_count} records")
 
 if __name__ == '__main__':
-    import_hospitals(r'C:\Users\ASUS\Desktop\create database\hospitals.csv')
+    # Replace with your actual CSV path
+    csv_path = r'C:/Users/ASUS/Desktop/MIS_project2/dataset'
+    import_hospitals(csv_path)
