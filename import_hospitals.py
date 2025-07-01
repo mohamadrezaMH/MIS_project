@@ -1,6 +1,7 @@
 import csv
 import sqlite3
 import os
+from crypto_utils import encrypt_value
 
 def import_hospitals(csv_file):
     """Import hospital data from CSV to SQLite database"""
@@ -51,7 +52,9 @@ def import_hospitals(csv_file):
         
         for row in reader:
             if len(row) == 24:
-                cursor.execute("INSERT INTO hospitals VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", row)
+                # Encrypt all fields except Facility_Name (index 0)
+                encrypted_row = [row[0]] + [encrypt_value(val) for val in row[1:]]
+                cursor.execute("INSERT INTO hospitals VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", encrypted_row)
                 row_count += 1
                 
                 # Print progress

@@ -4,7 +4,7 @@ from werkzeug.security import generate_password_hash
 def create_users():
     """Create initial users in the database"""
     users = [
-        {'username': 'alireza', 'password': 'mokhtari', 'bale_chat_id': '801131447'},
+        {'username': 'alireza', 'password': 'mokhtari', 'bale_chat_id': '1744206999'},
         {'username': 'mohamadreza', 'password': 'mohamadi', 'bale_chat_id': '801131449'},
         {'username': 'user3', 'password': 'user3', 'bale_chat_id': '801131440'}
     ]

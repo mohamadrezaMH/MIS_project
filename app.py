@@ -10,6 +10,7 @@ import requests
 import os
 import traceback
 from sqlalchemy import text
+from crypto_utils import decrypt_value
 
 # Initialize Flask app
 app = Flask(__name__)
@@ -114,6 +115,7 @@ def api_login():
         # Send code via Bale
         message = f"کد تأیید شما: {verification_code}\nاین کد تا ۲ دقیقه معتبر است."
         send_bale_message(user.bale_chat_id, message, BALE_BOT_TOKEN)
+        print(verification_code)
         
         return jsonify({'success': True, 'message': 'کد تأیید ارسال شد'})
     
@@ -199,6 +201,13 @@ def dashboard():
         
         for i, row in enumerate(result):
             hospital_dict = dict(zip(columns, row))
+            # Decrypt all fields except Facility_Name
+            for key in hospital_dict:
+                if key != 'Facility_Name' and hospital_dict[key] is not None:
+                    try:
+                        hospital_dict[key] = decrypt_value(hospital_dict[key])
+                    except Exception:
+                        pass
             hospital_dict['global_index'] = offset + 1 + i
             hospitals.append(hospital_dict)
         
@@ -251,6 +260,13 @@ def api_search():
         
         for i, row in enumerate(result):
             hospital_dict = dict(zip(columns, row))
+            # Decrypt all fields except Facility_Name
+            for key in hospital_dict:
+                if key != 'Facility_Name' and hospital_dict[key] is not None:
+                    try:
+                        hospital_dict[key] = decrypt_value(hospital_dict[key])
+                    except Exception:
+                        pass
             hospital_dict['global_index'] = offset + 1 + i
             hospitals.append(hospital_dict)
         
