@@ -63,9 +63,15 @@
         </div>
 
         <div class="data-card">
-            <div class="card-header">
-                <i class="fas fa-list me-2"></i>لیست بیمارستان‌ها و امتیازات
-            </div>
+            <!-- تغییر در بخش header کارت -->
+<div class="card-header d-flex justify-content-between align-items-center">
+    <div>
+        <i class="fas fa-list me-2"></i>لیست بیمارستان‌ها و امتیازات
+    </div>
+    <div class="text-muted" id="counter-display">
+        نمایش <span id="visible-counter">0</span> از <span id="total-counter">0</span> بیمارستان
+    </div>
+</div>
             
             <div class="search-container">
                 <div class="search-box">
@@ -95,80 +101,140 @@
                     </thead>
                     <tbody>
     {% for hospital in hospitals %}
-    <tr>
-        <td>{{ loop.index }}</td>
-        <td>
-            <div class="hospital-name">{{ hospital['Facility_Name'] }}</div>
-            <div class="hospital-city">
-                <i class="fas fa-map-marker-alt"></i>
-                {{ hospital['Facility_City'] }}, {{ hospital['Facility_State'] }}
-            </div>
-        </td>
-        <td>
-            <span class="hospital-type">{{ hospital['Facility_Type'] }}</span>
-        </td>
-        <td>
-            <div class="rating-cell">
-                <span class="rating-badge rating-{% if hospital['Rating_Overall']|float >= 4 %}excellent{% elif hospital['Rating_Overall']|float >= 3 %}good{% elif hospital['Rating_Overall']|float >= 2 %}average{% else %}poor{% endif %}">
-                    {{ hospital['Rating_Overall'] }}
-                </span>
-                <i class="fas fa-star text-warning"></i>
-            </div>
-        </td>
-        <td>
-            <div class="rating-cell">
-                <span class="rating-badge rating-{% if hospital['Rating_Mortality']|float >= 4 %}excellent{% elif hospital['Rating_Mortality']|float >= 3 %}good{% elif hospital['Rating_Mortality']|float >= 2 %}average{% else %}poor{% endif %}">
-                    {{ hospital['Rating_Mortality'] }}
-                </span>
-            </div>
-        </td>
-        <td>
-            <div class="rating-cell">
-                <span class="rating-badge rating-{% if hospital['Rating_Safety']|float >= 4 %}excellent{% elif hospital['Rating_Safety']|float >= 3 %}good{% elif hospital['Rating_Safety']|float >= 2 %}average{% else %}poor{% endif %}">
-                    {{ hospital['Rating_Safety'] }}
-                </span>
-            </div>
-        </td>
-        <td>
-            <div class="rating-cell">
-                <span class="rating-badge rating-{% if hospital['Rating_Readmission']|float >= 4 %}excellent{% elif hospital['Rating_Readmission']|float >= 3 %}good{% elif hospital['Rating_Readmission']|float >= 2 %}average{% else %}poor{% endif %}">
-                    {{ hospital['Rating_Readmission'] }}
-                </span>
-            </div>
-        </td>
-        <td>
-            <button class="btn btn-outline-primary action-btn">
-                <i class="fas fa-chart-bar me-1"></i>جزئیات
-            </button>
-            <button class="btn btn-outline-success action-btn">
-                <i class="fas fa-file-medical me-1"></i>گزارش
-            </button>
-        </td>
-    </tr>
-    {% else %}
-    <tr>
-        <td colspan="9" class="text-center py-4">
-            <i class="fas fa-database fa-2x mb-3"></i>
-            <h4>هیچ داده‌ای یافت نشد</h4>
-            <p class="text-muted">لطفاً مطمئن شوید دیتابیس حاوی اطلاعات است</p>
-        </td>
-    </tr>
-    {% endfor %}
+<tr>
+    <td>{{ hospital.global_index }}</td>
+    <td>
+        <div class="hospital-name">{{ hospital.Facility_Name }}</div>
+        <div class="hospital-city">
+            <i class="fas fa-map-marker-alt"></i>
+            {{ hospital.Facility_City }}, {{ hospital.Facility_State }}
+        </div>
+    </td>
+    <td>
+        <span class="hospital-type">{{ hospital.Facility_Type }}</span>
+    </td>
+    <td>
+        <div class="rating-cell">
+            <span class="rating-badge rating-{% if hospital.Rating_Overall|float >= 4 %}excellent{% elif hospital.Rating_Overall|float >= 3 %}good{% elif hospital.Rating_Overall|float >= 2 %}average{% else %}poor{% endif %}">
+                {{ hospital.Rating_Overall }}
+            </span>
+            <i class="fas fa-star text-warning"></i>
+        </div>
+    </td>
+    <td>
+        <div class="rating-cell">
+            <span class="rating-badge rating-{% if hospital.Rating_Mortality|float >= 4 %}excellent{% elif hospital.Rating_Mortality|float >= 3 %}good{% elif hospital.Rating_Mortality|float >= 2 %}average{% else %}poor{% endif %}">
+                {{ hospital.Rating_Mortality }}
+            </span>
+        </div>
+    </td>
+    <td>
+        <div class="rating-cell">
+            <span class="rating-badge rating-{% if hospital.Rating_Safety|float >= 4 %}excellent{% elif hospital.Rating_Safety|float >= 3 %}good{% elif hospital.Rating_Safety|float >= 2 %}average{% else %}poor{% endif %}">
+                {{ hospital.Rating_Safety }}
+            </span>
+        </div>
+    </td>
+    <td>
+        <div class="rating-cell">
+            <span class="rating-badge rating-{% if hospital.Rating_Readmission|float >= 4 %}excellent{% elif hospital.Rating_Readmission|float >= 3 %}good{% elif hospital.Rating_Readmission|float >= 2 %}average{% else %}poor{% endif %}">
+                {{ hospital.Rating_Readmission }}
+            </span>
+        </div>
+    </td>
+    <td>
+        <button class="btn btn-outline-primary action-btn">
+            <i class="fas fa-chart-bar me-1"></i>جزئیات
+        </button>
+        <button class="btn btn-outline-success action-btn">
+            <i class="fas fa-file-medical me-1"></i>گزارش
+        </button>
+    </td>
+</tr>
+{% endfor %}
 </tbody>
                 </table>
             </div>
             
-            <div class="pagination-container">
-                <nav>
-                    <ul class="pagination">
-                        <li class="page-item disabled"><a class="page-link" href="#">قبلی</a></li>
-                        <li class="page-item active"><a class="page-link" href="#">1</a></li>
-                        <li class="page-item"><a class="page-link" href="#">2</a></li>
-                        <li class="page-item"><a class="page-link" href="#">3</a></li>
-                        <li class="page-item"><a class="page-link" href="#">بعدی</a></li>
-                    </ul>
-                </nav>
-            </div>
+<!-- جایگزین کردن بخش pagination-container با کد زیر -->
+<div class="pagination-container">
+    <nav>
+        <ul class="pagination justify-content-center">
+            <!-- لینک صفحه قبلی -->
+            {% if current_page > 1 %}
+                <li class="page-item">
+                    <a class="page-link" href="{{ url_for('dashboard', page=current_page-1) }}">
+                        <i class="fas fa-arrow-right"></i> قبلی
+                    </a>
+                </li>
+            {% else %}
+                <li class="page-item disabled">
+                    <a class="page-link" href="#" tabindex="-1" aria-disabled="true">
+                        <i class="fas fa-arrow-right"></i> قبلی
+                    </a>
+                </li>
+            {% endif %}
+
+            <!-- لینک صفحات -->
+            {% set start_page = [1, current_page-2]|max %}
+            {% set end_page = [total_pages, current_page+2]|min %}
+            
+            {% if start_page > 1 %}
+                <li class="page-item">
+                    <a class="page-link" href="{{ url_for('dashboard', page=1) }}">1</a>
+                </li>
+                {% if start_page > 2 %}
+                    <li class="page-item disabled">
+                        <span class="page-link">...</span>
+                    </li>
+                {% endif %}
+            {% endif %}
+            
+            {% for page_num in range(start_page, end_page + 1) %}
+                {% if page_num == current_page %}
+                    <li class="page-item active" aria-current="page">
+                        <a class="page-link" href="#">{{ page_num }}</a>
+                    </li>
+                {% else %}
+                    <li class="page-item">
+                        <a class="page-link" href="{{ url_for('dashboard', page=page_num) }}">{{ page_num }}</a>
+                    </li>
+                {% endif %}
+            {% endfor %}
+            
+            {% if end_page < total_pages %}
+                {% if end_page < total_pages - 1 %}
+                    <li class="page-item disabled">
+                        <span class="page-link">...</span>
+                    </li>
+                {% endif %}
+                <li class="page-item">
+                    <a class="page-link" href="{{ url_for('dashboard', page=total_pages) }}">{{ total_pages }}</a>
+                </li>
+            {% endif %}
+
+            <!-- لینک صفحه بعدی -->
+            {% if current_page < total_pages %}
+                <li class="page-item">
+                    <a class="page-link" href="{{ url_for('dashboard', page=current_page+1) }}">
+                        بعدی <i class="fas fa-arrow-left"></i>
+                    </a>
+                </li>
+            {% else %}
+                <li class="page-item disabled">
+                    <a class="page-link" href="#" tabindex="-1" aria-disabled="true">
+                        بعدی <i class="fas fa-arrow-left"></i>
+                    </a>
+                </li>
+            {% endif %}
+        </ul>
+    </nav>
+    
+    <div class="text-center mt-2 text-muted">
+    نمایش {{ hospitals[0].global_index if hospitals else 0 }} تا {{ hospitals[-1].global_index if hospitals else 0 }} از {{ total_count }} بیمارستان
+    - صفحه {{ current_page }} از {{ total_pages }}
+</div>
+</div>
         </div>
     </div>
 

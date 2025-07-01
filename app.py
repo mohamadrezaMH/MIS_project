@@ -150,37 +150,60 @@ def api_resend():
     })
     
     
+  # اطمینان حاصل کنید که request ایمپورت شده است
+
 @app.route('/dashboard')
 def dashboard():
-    
     try:
         from sqlalchemy import text
-        query = text("SELECT * FROM hospitals")
-        result = db.session.execute(query)
+        # دریافت شماره صفحه از پارامتر URL
+        page = request.args.get('page', 1, type=int)
+        per_page = 50  # تعداد آیتم در هر صفحه
+        
+        # محاسبه offset
+        offset = (page - 1) * per_page
+        
+        # کوئری برای تعداد کل رکوردها
+        count_query = text("SELECT COUNT(*) FROM hospitals")
+        total_count = db.session.scalar(count_query)
+        
+        # کوئری برای دریافت داده‌ها با pagination
+        query = text("SELECT * FROM hospitals LIMIT :limit OFFSET :offset")
+        result = db.session.execute(query, {'limit': per_page, 'offset': offset})
         
         # حل مشکل تبدیل به دیکشنری
         hospitals = []
         columns = result.keys()  # دریافت نام ستون‌ها
         
-        for row in result:
+        # محاسبه شماره ردیف سراسری
+        global_index_start = offset + 1
+        
+        for i, row in enumerate(result):
             # ایجاد دیکشنری با زوج‌های (ستون: مقدار)
             hospital_dict = {column: value for column, value in zip(columns, row)}
+            # افزودن شماره ردیف سراسری
+            hospital_dict['global_index'] = global_index_start + i
             hospitals.append(hospital_dict)
         
-        print(f"تعداد بیمارستان‌ها: {len(hospitals)}")
+        print(f"تعداد بیمارستان‌ها در این صفحه: {len(hospitals)}")
+        print(f"کل بیمارستان‌ها: {total_count}")
         
-        # برای دیباگ: نمایش اولین رکورد
-        if hospitals:
-            print("نمونه رکورد:")
-            print(hospitals[0])
+        # محاسبات pagination
+        total_pages = (total_count + per_page - 1) // per_page
         
-        return render_template('dashboard.html', hospitals=hospitals)
+        return render_template(
+            'dashboard.html',
+            hospitals=hospitals,
+            current_page=page,
+            per_page=per_page,
+            total_count=total_count,
+            total_pages=total_pages
+        )
     except Exception as e:
         import traceback
         print(f"خطا در لود داشبورد: {str(e)}")
         traceback.print_exc()
         return f"خطا در لود داشبورد: {str(e)}", 500
-
 
 import json
 
