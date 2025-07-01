@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, session, jsonify
+from flask import Flask, render_template, request, session, jsonify , redirect, url_for
 from flask_sqlalchemy import SQLAlchemy
 import secrets
 import time
@@ -7,8 +7,8 @@ from datetime import datetime, timedelta
 import os
 from werkzeug.security import generate_password_hash, check_password_hash
 from config import BALE_BOT_TOKEN
+from functools import wraps
 
-from sqlalchemy import text  # این خط را در بالای فایل اضافه کنید
 
 
 app = Flask(__name__)
@@ -33,33 +33,23 @@ def initialize_database():
     with app.app_context():
         # فقط جدول User را ایجاد می‌کند
         db.create_all()
-        print("جدول User ایجاد شد")
 
 initialize_database()
 
-# در app.py
-print(f"استفاده از دیتابیس: {app.config['SQLALCHEMY_DATABASE_URI']}")
 
-# ---------- API Endpoints ----------
-
-# حذف @app.before_first_request و جایگزینی با این کد
-# with app.app_context():
-    # # ایجاد جدول کاربران اگر وجود ندارد
-    # if not db.engine.has_table('user'):
-    #     db.create_all()
-    #     print("جدول User ایجاد شد")
-    # else:
-    #     print("جدول User از قبل وجود دارد")
+# ---------- API Endpoints ----------      
     
-    # # بررسی وجود جدول hospitals
-    # if db.engine.has_table('hospitals'):
-    #     result = db.session.execute(text("SELECT COUNT(*) FROM hospitals"))
-    #     count = result.scalar()
-    #     print(f"تعداد رکوردها در hospitals: {count}")
-    # else:
-    #     print("جدول hospitals یافت نشد")
-        
-        
+    
+
+# تابع دکوراتور برای احراز هویت
+def login_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        # بررسی وجود user_id در session و احراز هویت دو مرحله‌ای
+        if 'authenticated' not in session or not session['authenticated']:
+            return redirect(url_for('index'))
+        return f(*args, **kwargs)
+    return decorated_function    
         
 
 @app.route('/')
@@ -97,12 +87,12 @@ def api_login():
             'message': 'نام کاربری یا رمز عبور اشتباه است'
         }), 401
 
+
 @app.route('/api/verify', methods=['POST'])
 def api_verify():
     data = request.get_json()
     user_code = data.get('code')
     
-    # بررسی انقضای کد
     if time.time() > session.get('code_expiry', 0):
         return jsonify({
             'success': False,
@@ -110,6 +100,8 @@ def api_verify():
         }), 400
     
     if user_code == session.get('verification_code'):
+        # تنظیم فلگ احراز هویت موفق
+        session['authenticated'] = True
         return jsonify({
             'success': True,
             'redirect': '/dashboard'
@@ -119,6 +111,7 @@ def api_verify():
             'success': False,
             'message': 'کد وارد شده اشتباه است'
         }), 400
+
 
 @app.route('/api/resend', methods=['POST'])
 def api_resend():
@@ -150,9 +143,18 @@ def api_resend():
     })
     
     
-  # اطمینان حاصل کنید که request ایمپورت شده است
+    
+# افزودن مسیر logout
+@app.route('/logout', methods=['POST'])
+def logout():
+    # پاک کردن session کاربر
+    session.clear()
+    return jsonify({'success': True})
+    
+    
 
 @app.route('/dashboard')
+@login_required
 def dashboard():
     try:
         from sqlalchemy import text
@@ -185,9 +187,6 @@ def dashboard():
             hospital_dict['global_index'] = global_index_start + i
             hospitals.append(hospital_dict)
         
-        print(f"تعداد بیمارستان‌ها در این صفحه: {len(hospitals)}")
-        print(f"کل بیمارستان‌ها: {total_count}")
-        
         # محاسبات pagination
         total_pages = (total_count + per_page - 1) // per_page
         
@@ -212,8 +211,10 @@ def tojson_filter(obj):
     return json.dumps(obj, ensure_ascii=False, indent=2)
    
    
-# این endpoint جدید را به app.py اضافه کنید
+   
+   
 @app.route('/api/search')
+@login_required
 def api_search():
     try:
         from sqlalchemy import text

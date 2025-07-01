@@ -1,24 +1,7 @@
 from app import app, db, User
 from werkzeug.security import generate_password_hash
-import os
-from flask_sqlalchemy import SQLAlchemy
-from flask import Flask
 
 def create_users():
-    
-    # app = Flask(__name__)
-    # app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{os.path.join(app.instance_path, "database.db")}'
-    # app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-    # app.config['SQLALCHEMY_ECHO'] = True
-    
-    # # اطمینان از وجود پوشه instance
-    # if not os.path.exists(app.instance_path):
-    #     os.makedirs(app.instance_path)
-    
-    # db = SQLAlchemy(app)
-    # # تنظیم مسیر دیتابیس به صورت مطلق
-    # app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(os.path.abspath(os.path.dirname(__file__)), 'database.db')
-    
     users = [
         {
             'username': 'alireza',

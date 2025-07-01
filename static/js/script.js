@@ -122,8 +122,8 @@ function showFailure(message) {
     clearInterval(timerInterval);
 }
 
-// Function to reset forms
-function resetForms() {
+// تغییر در تابع resetForms برای پاک کردن session
+async function resetForms() {
     document.getElementById('username').value = '';
     document.getElementById('password').value = '';
     document.getElementById('verification-code').value = '';
@@ -140,6 +140,33 @@ function resetForms() {
     document.getElementById('success-container').classList.add('d-none');
     document.getElementById('failure-container').classList.add('d-none');
     document.getElementById('login-container').classList.remove('d-none');
+    
+    // پاک کردن session از طریق API
+    try {
+        await fetch('/logout', { method: 'POST' });
+    } catch (error) {
+        console.error('Logout error in resetForms:', error);
+    }
+}
+
+
+// در انتهای فایل، قبل از event listenerها
+
+// تابع برای خروج از سیستم
+async function logout() {
+    try {
+        await fetch('/logout', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+        resetForms();
+        window.location.href = '/';
+    } catch (error) {
+        console.error('Logout error:', error);
+        showError('خطا در خروج از سیستم');
+    }
 }
 
 // Login form submission
@@ -227,6 +254,3 @@ document.getElementById('resend-code').addEventListener('click', async function(
         console.error('Resend error:', error);
     }
 });
-// Return to login page
-document.getElementById('back-to-login').addEventListener('click', resetForms);
-document.getElementById('try-again').addEventListener('click', resetForms);

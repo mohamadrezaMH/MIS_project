@@ -1,3 +1,33 @@
+// افزودن تابع logout به scope جهانی
+window.logout = function() {
+    fetch('/logout', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(response => {
+        if (response.ok) {
+            window.location.href = '/';
+        } else {
+            Swal.fire({
+                icon: 'error',
+                title: 'خطا',
+                text: 'خطا در خروج از سیستم'
+            });
+        }
+    })
+    .catch(error => {
+        console.error('Logout error:', error);
+        Swal.fire({
+            icon: 'error',
+            title: 'خطا',
+            text: 'خطا در خروج از سیستم'
+        });
+    });
+};
+
+
 // جایگزینی کامل اسکریپت جستجو با این کد
 document.addEventListener('DOMContentLoaded', function() {
     const searchInput = document.getElementById('searchInput');

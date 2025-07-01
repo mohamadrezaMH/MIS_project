@@ -227,8 +227,7 @@
         
         .search-box {
             max-width: 400px;
-            /* margin-left: 10px; */
-            direction: rtl;
+            margin-left: auto;
         }
         
         .pagination-container {
