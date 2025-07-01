@@ -77,7 +77,22 @@ def send_bale_message(user_id, message, bot_token):
 
 @app.route('/')
 def index():
-    """Render login page"""
+    """Render login page or redirect to dashboard if user is already logged in"""
+    # Check if user is authenticated and session is still valid
+    if 'authenticated' in session and session['authenticated']:
+        # Check session expiration based on login time
+        if 'login_time' in session:
+            current_time = datetime.now().timestamp()
+            login_time = session['login_time']
+            elapsed = current_time - login_time
+            
+            # If session is still valid, redirect to dashboard
+            if elapsed <= 300:  # 5 minutes in seconds
+                return redirect(url_for('dashboard'))
+            else:
+                # Clear expired session
+                session.clear()
+    
     return render_template('index.html')
 
 @app.route('/api/login', methods=['POST'])
