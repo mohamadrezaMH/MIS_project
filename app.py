@@ -14,6 +14,8 @@ from sqlalchemy import text
 # Initialize Flask app
 app = Flask(__name__)
 app.secret_key = os.environ.get('SECRET_KEY') or secrets.token_hex(32)
+app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=5)
+app.config['SESSION_REFRESH_EACH_REQUEST'] = True
 
 # Database configuration
 app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{os.path.join(app.instance_path, "database.db")}'
@@ -44,6 +46,15 @@ def login_required(f):
         # Check if user is authenticated
         if 'authenticated' not in session or not session['authenticated']:
             return redirect(url_for('index'))
+        
+        # Check session expiration based on login time (5 minutes from login)
+        if 'login_time' in session:
+            login_time = session['login_time']
+            elapsed = datetime.now().timestamp() - login_time
+            if elapsed > 300:  # 5 minutes in seconds
+                session.clear()
+                return redirect(url_for('index'))
+        
         return f(*args, **kwargs)
     return decorated_function
 
@@ -106,7 +117,12 @@ def api_verify():
     # Verify code
     if user_code == session.get('verification_code'):
         session['authenticated'] = True
-        return jsonify({'success': True, 'redirect': '/dashboard'})
+        session['login_time'] = datetime.now().timestamp()  # Add activity timestamp
+        return jsonify({
+            'success': True, 
+            'redirect': '/dashboard',
+            'login_time': session['login_time']
+        })
     
     return jsonify({'success': False, 'message': 'کد وارد شده اشتباه است'}), 400
 
@@ -143,6 +159,12 @@ def logout():
 def dashboard():
     """Render dashboard with hospital data"""
     try:
+        # Calculate remaining session time
+        current_time = datetime.now().timestamp()
+        login_time = session.get('login_time', current_time)
+        elapsed = current_time - login_time
+        remaining_seconds = max(0, 300 - int(elapsed))  # 5 minutes - elapsed time
+        
         # Pagination parameters
         page = request.args.get('page', 1, type=int)
         per_page = 50
@@ -174,7 +196,8 @@ def dashboard():
             current_page=page,
             per_page=per_page,
             total_count=total_count,
-            total_pages=total_pages
+            total_pages=total_pages,
+            remaining_seconds=remaining_seconds  # Pass remaining seconds to template
         )
     except Exception as e:
         traceback.print_exc()

@@ -325,3 +325,12 @@
     color: #721c24;
     border-radius: 10px;
 }
+
+
+.session-timer {
+    background-color: #f8f9fa;
+    padding: 5px 10px;
+    border-radius: 5px;
+    color: #dc3545;
+    font-size: 1.1rem;
+}

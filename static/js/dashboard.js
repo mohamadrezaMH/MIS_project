@@ -4,6 +4,12 @@ const searchButton = document.getElementById('searchButton');
 let currentSearchTerm = '';
 let currentPage = 1;
 let totalPages = 1;
+let sessionTimer;
+
+let remainingTime = 300; // default value
+if (typeof window.remainingSeconds !== 'undefined' && !isNaN(window.remainingSeconds)) {
+    remainingTime = parseInt(window.remainingSeconds);
+}
 
 // ----------------------------
 // Helper Functions
@@ -48,6 +54,79 @@ function performSearch() {
     loadData(currentPage, currentSearchTerm);
 }
 
+// ----------------------------
+// Session Timer Functions
+// ----------------------------
+
+/**
+ * Initialize session timer
+ */
+function initSessionTimer() {
+    // If session already expired
+    if (remainingTime <= 0) {
+        sessionExpired();
+        return;
+    }
+    
+    // Clear any existing timer
+    clearInterval(sessionTimer);
+    
+    // Start countdown
+    sessionTimer = setInterval(() => {
+        remainingTime--;
+        updateTimerDisplay();
+        
+        if (remainingTime <= 0) {
+            clearInterval(sessionTimer);
+            sessionExpired();
+        }
+    }, 1000);
+}
+
+/**
+ * Update timer display
+ */
+function updateTimerDisplay() {
+    const minutes = Math.floor(remainingTime / 60);
+    const seconds = remainingTime % 60;
+    const timerElement = document.getElementById('session-timer');
+    
+    if (timerElement) {
+        timerElement.textContent = `زمان باقیمانده: ${minutes}:${seconds.toString().padStart(2, '0')}`;
+        
+        // Change color when time is running out
+        if (remainingTime <= 60) {
+            timerElement.style.color = '#dc3545';
+        } else if (remainingTime <= 120) {
+            timerElement.style.color = '#fd7e14';
+        } else {
+            timerElement.style.color = '#28a745';
+        }
+    }
+}
+
+/**
+ * Handle session expiration
+ */
+/**
+ * Handle session expiration
+ */
+function sessionExpired() {
+    Swal.fire({
+        icon: 'warning',
+        title: 'اتمام زمان',
+        text: 'زمان شما به پایان رسیده است. لطفاً مجدداً وارد شوید.',
+        confirmButtonText: 'ورود مجدد',
+        allowOutsideClick: false,
+        allowEscapeKey: false
+    }).then(() => {
+        // Clear server session
+        fetch('/logout', { method: 'POST' })
+            .then(() => {
+                window.location.href = '/';
+            });
+    });
+}
 // ----------------------------
 // Data Loading Functions
 // ----------------------------
@@ -120,11 +199,10 @@ function renderTable(hospitals) {
                 <td>${hospital.global_index}</td>
                 <td>
                     <div class="hospital-name">${hospital.Facility_Name}</div>
-                    
                 </td>
                 <td>
-                <div class="hospital-city">
-                        ${hospital.Facility_City} <!--, ${hospital.Facility_State} -->
+                    <div class="hospital-city">
+                        ${hospital.Facility_City}
                         <i class="fas fa-map-marker-alt"></i>
                     </div>
                 </td>
@@ -195,7 +273,7 @@ function updatePagination(totalCount, currentPage, totalPages, hospitals) {
     // Build pagination HTML
     let paginationHTML = `
         <nav>
-            <ul class="pagination justify-content-center" style="flex-direction : row-reverse;">
+            <ul class="pagination justify-content-center" style="flex-direction: row-reverse;">
     `;
     
     // Previous button
@@ -348,6 +426,21 @@ window.logout = function() {
 // ----------------------------
 
 document.addEventListener('DOMContentLoaded', function() {
+    // Add timer element to header
+    const header = document.querySelector('.dashboard-header');
+    if (header) {
+        const timerDiv = document.createElement('div');
+        timerDiv.id = 'session-timer';
+        timerDiv.className = 'session-timer';
+        timerDiv.style.fontWeight = 'bold';
+        timerDiv.style.marginTop = '10px';
+        timerDiv.style.fontSize = '1.1rem';
+        header.appendChild(timerDiv);
+    }
+    
+    // Initialize session timer
+    initSessionTimer();
+    
     // Search input events
     if (searchInput && searchButton) {
         searchInput.addEventListener('keyup', function(e) {
