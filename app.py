@@ -115,7 +115,6 @@ def api_login():
         # Send code via Bale
         message = f"کد تأیید شما: {verification_code}\nاین کد تا ۲ دقیقه معتبر است."
         send_bale_message(user.bale_chat_id, message, BALE_BOT_TOKEN)
-        print(verification_code)
         
         return jsonify({'success': True, 'message': 'کد تأیید ارسال شد'})
     
